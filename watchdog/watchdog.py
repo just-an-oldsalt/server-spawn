@@ -160,8 +160,8 @@ def _read_new_log_lines(position: int) -> tuple[list[str], int]:
 
 def check_commands(lines: list[str]) -> tuple[bool, bool]:
     """Scan new log lines for player commands. Returns (shutdown, extend)."""
-    shutdown = any(re.search(r"issued server command: /shutdown", line) for line in lines)
-    extend = any(re.search(r"issued server command: /extend", line) for line in lines)
+    shutdown = any(re.search(r"<\w+>.*!shutdown", line) for line in lines)
+    extend = any(re.search(r"<\w+>.*!extend", line) for line in lines)
     return shutdown, extend
 
 
@@ -271,11 +271,11 @@ def main() -> None:
         ticks_remaining = required_empty_ticks - empty_ticks
 
         if ticks_remaining == 5 and not warned_5:
-            rcon_say("Server hibernating in 5 minutes due to inactivity. Type /extend to delay.")
+            rcon_say("Server hibernating in 5 minutes due to inactivity. Type !extend in chat to delay.")
             warned_5 = True
 
         if ticks_remaining == 1 and not warned_1:
-            rcon_say("Server hibernating in 1 minute due to inactivity. Type /extend to delay.")
+            rcon_say("Server hibernating in 1 minute due to inactivity. Type !extend in chat to delay.")
             warned_1 = True
 
         if empty_ticks >= required_empty_ticks:
