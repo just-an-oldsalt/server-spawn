@@ -136,6 +136,7 @@ Environment="HOSTED_ZONE_ID=${hosted_zone_id}"
 Environment="DOMAIN_NAME=${domain_name}"
 Environment="AWS_REGION=${aws_region}"
 Environment="INACTIVITY_MINUTES=${inactivity_minutes}"
+Environment="HIBERNATE=${hibernate}"
 ExecStart=/usr/bin/python3 $WATCHDOG_DIR/watchdog.py
 Restart=on-failure
 RestartSec=30

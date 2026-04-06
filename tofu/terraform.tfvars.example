@@ -10,4 +10,5 @@ minecraft_version  = "latest"
 spot_instance      = false
 minecraft_memory_mb = 2048
 availability_zone  = "eu-west-1a"   # Must match the AZ of your world data EBS volume
+hibernate          = true            # Hibernate on idle shutdown for fast resume; disable if using spot_instance
 # key_name           = "my-key-pair"  # EC2 key pair name for SSH access; omit to disable
