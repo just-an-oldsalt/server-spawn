@@ -9,3 +9,4 @@ inactivity_minutes = 20
 minecraft_version  = "latest"
 spot_instance      = false
 minecraft_memory_mb = 2048
+# key_name           = "my-key-pair"  # EC2 key pair name for SSH access; omit to disable

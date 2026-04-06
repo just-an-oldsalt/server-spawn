@@ -62,3 +62,9 @@ variable "minecraft_memory_mb" {
   type        = number
   default     = 2048
 }
+
+variable "key_name" {
+  description = "EC2 key pair name for SSH access. Leave empty to disable SSH."
+  type        = string
+  default     = ""
+}
