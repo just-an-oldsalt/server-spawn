@@ -63,6 +63,12 @@ variable "minecraft_memory_mb" {
   default     = 2048
 }
 
+variable "availability_zone" {
+  description = "Availability zone for the EC2 instance and world data EBS volume. Must match — changing this requires migrating the EBS volume."
+  type        = string
+  default     = ""
+}
+
 variable "key_name" {
   description = "EC2 key pair name for SSH access. Leave empty to disable SSH."
   type        = string
