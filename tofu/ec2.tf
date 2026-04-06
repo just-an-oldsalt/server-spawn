@@ -51,6 +51,7 @@ resource "aws_instance" "minecraft" {
   vpc_security_group_ids = [aws_security_group.minecraft.id]
   key_name               = var.key_name != "" ? var.key_name : null
   availability_zone      = var.availability_zone
+  hibernation            = var.hibernate
 
   # IMDSv2 required (more secure than v1)
   metadata_options {
@@ -85,6 +86,7 @@ resource "aws_instance" "minecraft" {
     hosted_zone_id       = local.hosted_zone_id
     aws_region           = var.aws_region
     artifacts_bucket     = aws_s3_bucket.artifacts.id
+    hibernate            = var.hibernate
   }))
 
   # Don't replace the instance when user_data changes — world data must persist
