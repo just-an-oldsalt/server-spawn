@@ -10,6 +10,7 @@
 #   ${hosted_zone_id}      — Route53 zone ID
 #   ${aws_region}          — e.g. eu-west-1
 #   ${artifacts_bucket}    — S3 bucket holding watchdog.py
+#   ${inactivity_minutes}  — e.g. 20
 
 set -euo pipefail
 exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
@@ -76,7 +77,21 @@ for v in d['versions']:
 fi
 
 echo "eula=true" > "$MC_DIR/eula.txt"
-chown "$MC_USER:$MC_USER" "$MC_DIR/eula.txt"
+
+# ── RCON ──────────────────────────────────────────────────────────────────────
+RCON_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")
+
+# Pre-create server.properties with RCON enabled before first server start.
+# Minecraft will populate remaining defaults on first boot.
+if [ ! -f "$MC_DIR/server.properties" ]; then
+  cat > "$MC_DIR/server.properties" << PROPS
+enable-rcon=true
+rcon.port=25575
+rcon.password=$RCON_PASSWORD
+PROPS
+fi
+
+chown -R "$MC_USER:$MC_USER" "$MC_DIR"
 
 # ── Watchdog ──────────────────────────────────────────────────────────────────
 WATCHDOG_DIR=/opt/watchdog
@@ -136,6 +151,7 @@ Environment="HOSTED_ZONE_ID=${hosted_zone_id}"
 Environment="DOMAIN_NAME=${domain_name}"
 Environment="AWS_REGION=${aws_region}"
 Environment="INACTIVITY_MINUTES=${inactivity_minutes}"
+Environment="RCON_PASSWORD=$RCON_PASSWORD"
 ExecStart=/usr/bin/python3 $WATCHDOG_DIR/watchdog.py
 Restart=on-failure
 RestartSec=30
