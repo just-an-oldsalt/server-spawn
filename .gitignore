@@ -1,0 +1,16 @@
+# OpenTofu / Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfvars
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/override.tf
+**/override.tf.json
+
+# Lambda build artifact
+lambda/start_server.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
