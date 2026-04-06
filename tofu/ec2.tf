@@ -25,6 +25,17 @@ resource "aws_security_group" "minecraft" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  dynamic "ingress" {
+    for_each = var.key_name != "" ? [1] : []
+    content {
+      description = "SSH"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -38,6 +49,8 @@ resource "aws_instance" "minecraft" {
   instance_type          = var.instance_type
   iam_instance_profile   = aws_iam_instance_profile.ec2.name
   vpc_security_group_ids = [aws_security_group.minecraft.id]
+  key_name               = var.key_name != "" ? var.key_name : null
+  availability_zone      = var.availability_zone
 
   # IMDSv2 required (more secure than v1)
   metadata_options {
@@ -76,7 +89,7 @@ resource "aws_instance" "minecraft" {
 
   # Don't replace the instance when user_data changes — world data must persist
   lifecycle {
-    ignore_changes = [user_data, ami]
+    ignore_changes = [user_data, ami, availability_zone]
   }
 
   tags = {
@@ -86,7 +99,7 @@ resource "aws_instance" "minecraft" {
 
 # Separate data volume — survives instance replacement
 resource "aws_ebs_volume" "world_data" {
-  availability_zone = aws_instance.minecraft.availability_zone
+  availability_zone = var.availability_zone
   size              = var.data_volume_size_gb
   type              = "gp3"
   encrypted         = true
