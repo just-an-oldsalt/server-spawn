@@ -19,6 +19,7 @@ echo "=== server-spawn user_data starting ==="
 
 # ── System packages ───────────────────────────────────────────────────────────
 dnf update -y
+dnf install -y htop nano wget unzip tree bind-utils
 dnf install -y java-25-amazon-corretto-headless python3-pip || \
   dnf install -y java-21-amazon-corretto-headless python3-pip
 
