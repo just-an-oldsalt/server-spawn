@@ -104,6 +104,10 @@ cat > "$MC_DIR/whitelist.json" << 'MCEOF'
 ${whitelist_json}
 MCEOF
 
+cat > "$MC_DIR/banned-players.json" << 'MCEOF'
+${banned_json}
+MCEOF
+
 chown -R "$MC_USER:$MC_USER" "$MC_DIR"
 
 # ── Watchdog ──────────────────────────────────────────────────────────────────

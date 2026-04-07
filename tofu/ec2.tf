@@ -90,7 +90,15 @@ resource "aws_instance" "minecraft" {
       uuid                = op.uuid
       name                = op.name
       level               = op.level
-      bypassesPlayerLimit = false
+      bypassesPlayerLimit = op.bypassesPlayerLimit
+    }])
+    banned_json          = jsonencode([for p in var.banned : {
+      uuid    = p.uuid
+      name    = p.name
+      created = "2000-01-01 00:00:00 +0000"
+      source  = "Server"
+      expires = "forever"
+      reason  = p.reason
     }])
     whitelist_json       = jsonencode([for p in var.whitelist : {
       uuid = p.uuid

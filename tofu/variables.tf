@@ -84,9 +84,20 @@ variable "server_properties" {
 variable "ops" {
   description = "Operator list — players with admin access. Requires UUID and name."
   type = list(object({
-    uuid  = string
-    name  = string
-    level = optional(number, 4)
+    uuid                = string
+    name                = string
+    level               = optional(number, 4)
+    bypassesPlayerLimit = optional(bool, false)
+  }))
+  default = []
+}
+
+variable "banned" {
+  description = "Banned players written to banned-players.json."
+  type = list(object({
+    uuid   = string
+    name   = string
+    reason = optional(string, "Banned by an operator.")
   }))
   default = []
 }
