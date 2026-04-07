@@ -74,3 +74,28 @@ variable "key_name" {
   type        = string
   default     = ""
 }
+
+variable "server_properties" {
+  description = "Additional server.properties key-value pairs merged in at boot (e.g. difficulty, gamemode, max-players)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "ops" {
+  description = "Operator list — players with admin access. Requires UUID and name."
+  type = list(object({
+    uuid  = string
+    name  = string
+    level = optional(number, 4)
+  }))
+  default = []
+}
+
+variable "whitelist" {
+  description = "Whitelisted players. If any entries are set, white-list=true is added to server.properties."
+  type = list(object({
+    uuid = string
+    name = string
+  }))
+  default = []
+}
