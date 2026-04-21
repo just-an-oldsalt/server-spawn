@@ -11,3 +11,17 @@ spot_instance      = false
 minecraft_memory_mb = 2048
 availability_zone  = "eu-west-1a"   # Must match the AZ of your world data EBS volume
 # key_name           = "my-key-pair"  # EC2 key pair name for SSH access; omit to disable
+
+# server_properties = {
+#   difficulty  = "hard"
+#   gamemode    = "survival"
+#   max-players = "10"
+# }
+
+# ops = [
+#   { uuid = "069a79f4-44e9-4726-a5be-fca90e38aaf5", name = "Notch" },
+# ]
+
+# whitelist = [
+#   { uuid = "069a79f4-44e9-4726-a5be-fca90e38aaf5", name = "Notch" },
+# ]
