@@ -13,6 +13,7 @@
 #   ${server_props_b64}    — base64-encoded JSON map of extra server.properties
 #   ${ops_json}            — JSON array for ops.json
 #   ${whitelist_json}      — JSON array for whitelist.json
+#   ${banned_json}         — JSON array for banned-players.json
 #   ${enable_whitelist}    — true/false whether to set white-list=true
 
 set -euo pipefail

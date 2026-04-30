@@ -14,3 +14,9 @@ lambda/start_server.zip
 __pycache__/
 *.py[cod]
 .venv/
+
+# Editor / tooling
+.claude/
+.idea/
+.vscode/
+.DS_Store

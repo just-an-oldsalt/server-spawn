@@ -22,7 +22,7 @@ resource "aws_lambda_function" "start_server" {
 
   environment {
     variables = {
-      INSTANCE_ID = aws_instance.minecraft.id
+      INSTANCE_ID       = aws_instance.minecraft.id
       AWS_REGION_TARGET = var.aws_region
     }
   }
