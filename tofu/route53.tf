@@ -25,10 +25,10 @@ resource "aws_route53_record" "minecraft" {
 
 # Enable Route53 query logging so DNS lookups trigger Lambda
 resource "aws_route53_query_log" "minecraft" {
-  provider                         = aws.us_east_1
-  depends_on                       = [aws_cloudwatch_log_resource_policy.route53]
-  cloudwatch_log_group_arn         = aws_cloudwatch_log_group.route53_queries.arn
-  zone_id                          = local.hosted_zone_id
+  provider                 = aws.us_east_1
+  depends_on               = [aws_cloudwatch_log_resource_policy.route53]
+  cloudwatch_log_group_arn = aws_cloudwatch_log_group.route53_queries.arn
+  zone_id                  = local.hosted_zone_id
 }
 
 resource "aws_cloudwatch_log_group" "route53_queries" {

@@ -51,6 +51,7 @@ HOSTED_ZONE_ID = _require_env("HOSTED_ZONE_ID")
 DOMAIN_NAME = _require_env("DOMAIN_NAME")
 AWS_REGION = _require_env("AWS_REGION")
 INACTIVITY_MINUTES = int(os.environ.get("INACTIVITY_MINUTES", "20"))
+HIBERNATE = os.environ.get("HIBERNATE", "false").lower() == "true"
 RCON_PASSWORD = os.environ.get("RCON_PASSWORD", "")
 POLL_INTERVAL_SECONDS = 60
 MC_HOST = "localhost"
@@ -169,6 +170,13 @@ def check_commands(lines: list[str]) -> tuple[bool, bool]:
 
 def stop_instance() -> None:
     ec2 = boto3.client("ec2", region_name=AWS_REGION)
+    if HIBERNATE:
+        _log("hibernating_instance", instance_id=INSTANCE_ID)
+        try:
+            ec2.stop_instances(InstanceIds=[INSTANCE_ID], Hibernate=True)
+            sys.exit(0)
+        except ClientError as e:
+            _log("hibernate_failed_falling_back", instance_id=INSTANCE_ID, error=str(e))
     _log("stopping_instance", instance_id=INSTANCE_ID)
     try:
         ec2.stop_instances(InstanceIds=[INSTANCE_ID])
@@ -257,6 +265,8 @@ def main() -> None:
         count = get_player_count()
 
         if count is None:
+            # Server unreachable — count this tick as empty so a stuck server
+            # doesn't keep the instance alive forever.
             _log("server_unreachable", empty_ticks=empty_ticks)
             empty_ticks += 1
         elif count > 0:

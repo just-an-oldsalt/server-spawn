@@ -10,7 +10,12 @@
 #   ${hosted_zone_id}      — Route53 zone ID
 #   ${aws_region}          — e.g. eu-west-1
 #   ${artifacts_bucket}    — S3 bucket holding watchdog.py
-#   ${inactivity_minutes}  — e.g. 20
+#   ${server_props_b64}    — base64-encoded JSON map of extra server.properties
+#   ${ops_json}            — JSON array for ops.json
+#   ${whitelist_json}      — JSON array for whitelist.json
+#   ${banned_json}         — JSON array for banned-players.json
+#   ${enable_whitelist}    — true/false whether to set white-list=true
+#   ${hibernate}           — true/false whether watchdog hibernates on idle stop
 
 set -euo pipefail
 exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
@@ -80,17 +85,41 @@ fi
 echo "eula=true" > "$MC_DIR/eula.txt"
 
 # ── RCON ──────────────────────────────────────────────────────────────────────
+# A random password each boot — never logged or persisted to disk outside of
+# server.properties (which is owned by the minecraft user, mode 600).
 RCON_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")
 
-# Pre-create server.properties with RCON enabled before first server start.
-# Minecraft will populate remaining defaults on first boot.
+# ── Server config ─────────────────────────────────────────────────────────────
+# Pre-create server.properties (with RCON + whitelist + Terraform overrides)
+# before first server start. Minecraft populates remaining defaults on first
+# boot. ops.json / whitelist.json / banned-players.json are managed by
+# Terraform on every boot.
 if [ ! -f "$MC_DIR/server.properties" ]; then
-  cat > "$MC_DIR/server.properties" << PROPS
-enable-rcon=true
-rcon.port=25575
-rcon.password=$RCON_PASSWORD
-PROPS
+  {
+    echo "enable-rcon=true"
+    echo "rcon.port=25575"
+    echo "rcon.password=$RCON_PASSWORD"
+    %{if enable_whitelist}echo "white-list=true"
+    %{endif}
+    python3 -c "
+import json, base64
+for k, v in json.loads(base64.b64decode('${server_props_b64}').decode()).items():
+    print(k + '=' + str(v))
+"
+  } > "$MC_DIR/server.properties"
 fi
+
+cat > "$MC_DIR/ops.json" << 'MCEOF'
+${ops_json}
+MCEOF
+
+cat > "$MC_DIR/whitelist.json" << 'MCEOF'
+${whitelist_json}
+MCEOF
+
+cat > "$MC_DIR/banned-players.json" << 'MCEOF'
+${banned_json}
+MCEOF
 
 chown -R "$MC_USER:$MC_USER" "$MC_DIR"
 
@@ -152,6 +181,7 @@ Environment="HOSTED_ZONE_ID=${hosted_zone_id}"
 Environment="DOMAIN_NAME=${domain_name}"
 Environment="AWS_REGION=${aws_region}"
 Environment="INACTIVITY_MINUTES=${inactivity_minutes}"
+Environment="HIBERNATE=${hibernate}"
 Environment="RCON_PASSWORD=$RCON_PASSWORD"
 ExecStart=/usr/bin/python3 $WATCHDOG_DIR/watchdog.py
 Restart=on-failure
