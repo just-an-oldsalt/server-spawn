@@ -15,6 +15,7 @@
 #   ${whitelist_json}      — JSON array for whitelist.json
 #   ${banned_json}         — JSON array for banned-players.json
 #   ${enable_whitelist}    — true/false whether to set white-list=true
+#   ${hibernate}           — true/false whether watchdog hibernates on idle stop
 
 set -euo pipefail
 exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
@@ -169,6 +170,7 @@ Environment="HOSTED_ZONE_ID=${hosted_zone_id}"
 Environment="DOMAIN_NAME=${domain_name}"
 Environment="AWS_REGION=${aws_region}"
 Environment="INACTIVITY_MINUTES=${inactivity_minutes}"
+Environment="HIBERNATE=${hibernate}"
 ExecStart=/usr/bin/python3 $WATCHDOG_DIR/watchdog.py
 Restart=on-failure
 RestartSec=30

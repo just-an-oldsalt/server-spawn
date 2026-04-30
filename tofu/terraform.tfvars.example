@@ -13,6 +13,7 @@ inactivity_minutes  = 20
 minecraft_version   = "latest"     # or a specific version like "1.20.4"
 minecraft_memory_mb = 2048
 spot_instance       = false
+hibernate           = true        # Hibernate on idle shutdown for fast resume; cannot be combined with spot_instance
 # key_name          = "my-key-pair" # EC2 key pair for SSH; omit to disable SSH
 
 # ── Optional: Minecraft server.properties overrides ───────────────────────────

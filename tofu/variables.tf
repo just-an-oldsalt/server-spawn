@@ -75,6 +75,17 @@ variable "key_name" {
   default     = ""
 }
 
+variable "hibernate" {
+  description = "Hibernate the instance on idle shutdown instead of stopping. Resumes in seconds rather than cold-booting. Cannot be used with spot_instance."
+  type        = bool
+  default     = true
+
+  validation {
+    condition     = !(var.hibernate && var.spot_instance)
+    error_message = "hibernate = true is not compatible with spot_instance = true."
+  }
+}
+
 variable "server_properties" {
   description = "Additional server.properties key-value pairs merged in at boot (e.g. difficulty, gamemode, max-players)."
   type        = map(string)

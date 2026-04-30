@@ -48,6 +48,7 @@ HOSTED_ZONE_ID = _require_env("HOSTED_ZONE_ID")
 DOMAIN_NAME = _require_env("DOMAIN_NAME")
 AWS_REGION = _require_env("AWS_REGION")
 INACTIVITY_MINUTES = int(os.environ.get("INACTIVITY_MINUTES", "20"))
+HIBERNATE = os.environ.get("HIBERNATE", "false").lower() == "true"
 POLL_INTERVAL_SECONDS = 60
 MC_HOST = "localhost"
 MC_PORT = 25565
@@ -119,6 +120,13 @@ def get_player_count() -> Optional[int]:
 
 def stop_instance() -> None:
     ec2 = boto3.client("ec2", region_name=AWS_REGION)
+    if HIBERNATE:
+        _log("hibernating_instance", instance_id=INSTANCE_ID)
+        try:
+            ec2.stop_instances(InstanceIds=[INSTANCE_ID], Hibernate=True)
+            sys.exit(0)
+        except ClientError as e:
+            _log("hibernate_failed_falling_back", instance_id=INSTANCE_ID, error=str(e))
     _log("stopping_instance", instance_id=INSTANCE_ID)
     try:
         ec2.stop_instances(InstanceIds=[INSTANCE_ID])
