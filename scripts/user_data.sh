@@ -24,6 +24,7 @@ echo "=== server-spawn user_data starting ==="
 
 # ── System packages ───────────────────────────────────────────────────────────
 dnf update -y
+dnf install -y htop nano wget unzip tree bind-utils
 dnf install -y java-25-amazon-corretto-headless python3-pip || \
   dnf install -y java-21-amazon-corretto-headless python3-pip
 
@@ -83,11 +84,21 @@ fi
 
 echo "eula=true" > "$MC_DIR/eula.txt"
 
+# ── RCON ──────────────────────────────────────────────────────────────────────
+# A random password each boot — never logged or persisted to disk outside of
+# server.properties (which is owned by the minecraft user, mode 600).
+RCON_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")
+
 # ── Server config ─────────────────────────────────────────────────────────────
-# Write server.properties, ops.json, and whitelist.json before first start.
-# Minecraft populates remaining server.properties defaults on first boot.
+# Pre-create server.properties (with RCON + whitelist + Terraform overrides)
+# before first server start. Minecraft populates remaining defaults on first
+# boot. ops.json / whitelist.json / banned-players.json are managed by
+# Terraform on every boot.
 if [ ! -f "$MC_DIR/server.properties" ]; then
   {
+    echo "enable-rcon=true"
+    echo "rcon.port=25575"
+    echo "rcon.password=$RCON_PASSWORD"
     %{if enable_whitelist}echo "white-list=true"
     %{endif}
     python3 -c "
@@ -171,6 +182,7 @@ Environment="DOMAIN_NAME=${domain_name}"
 Environment="AWS_REGION=${aws_region}"
 Environment="INACTIVITY_MINUTES=${inactivity_minutes}"
 Environment="HIBERNATE=${hibernate}"
+Environment="RCON_PASSWORD=$RCON_PASSWORD"
 ExecStart=/usr/bin/python3 $WATCHDOG_DIR/watchdog.py
 Restart=on-failure
 RestartSec=30
