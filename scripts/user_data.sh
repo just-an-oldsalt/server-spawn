@@ -10,6 +10,10 @@
 #   ${hosted_zone_id}      — Route53 zone ID
 #   ${aws_region}          — e.g. eu-west-1
 #   ${artifacts_bucket}    — S3 bucket holding watchdog.py
+#   ${server_props_b64}    — base64-encoded JSON map of extra server.properties
+#   ${ops_json}            — JSON array for ops.json
+#   ${whitelist_json}      — JSON array for whitelist.json
+#   ${enable_whitelist}    — true/false whether to set white-list=true
 
 set -euo pipefail
 exec > >(tee /var/log/user_data.log | logger -t user_data) 2>&1
@@ -76,7 +80,35 @@ for v in d['versions']:
 fi
 
 echo "eula=true" > "$MC_DIR/eula.txt"
-chown "$MC_USER:$MC_USER" "$MC_DIR/eula.txt"
+
+# ── Server config ─────────────────────────────────────────────────────────────
+# Write server.properties, ops.json, and whitelist.json before first start.
+# Minecraft populates remaining server.properties defaults on first boot.
+if [ ! -f "$MC_DIR/server.properties" ]; then
+  {
+    %{if enable_whitelist}echo "white-list=true"
+    %{endif}
+    python3 -c "
+import json, base64
+for k, v in json.loads(base64.b64decode('${server_props_b64}').decode()).items():
+    print(k + '=' + str(v))
+"
+  } > "$MC_DIR/server.properties"
+fi
+
+cat > "$MC_DIR/ops.json" << 'MCEOF'
+${ops_json}
+MCEOF
+
+cat > "$MC_DIR/whitelist.json" << 'MCEOF'
+${whitelist_json}
+MCEOF
+
+cat > "$MC_DIR/banned-players.json" << 'MCEOF'
+${banned_json}
+MCEOF
+
+chown -R "$MC_USER:$MC_USER" "$MC_DIR"
 
 # ── Watchdog ──────────────────────────────────────────────────────────────────
 WATCHDOG_DIR=/opt/watchdog

@@ -85,6 +85,26 @@ resource "aws_instance" "minecraft" {
     hosted_zone_id       = local.hosted_zone_id
     aws_region           = var.aws_region
     artifacts_bucket     = aws_s3_bucket.artifacts.id
+    server_props_b64     = base64encode(jsonencode(var.server_properties))
+    ops_json             = jsonencode([for op in var.ops : {
+      uuid                = op.uuid
+      name                = op.name
+      level               = op.level
+      bypassesPlayerLimit = op.bypassesPlayerLimit
+    }])
+    banned_json          = jsonencode([for p in var.banned : {
+      uuid    = p.uuid
+      name    = p.name
+      created = "2000-01-01 00:00:00 +0000"
+      source  = "Server"
+      expires = "forever"
+      reason  = p.reason
+    }])
+    whitelist_json       = jsonencode([for p in var.whitelist : {
+      uuid = p.uuid
+      name = p.name
+    }])
+    enable_whitelist     = length(var.whitelist) > 0
   }))
 
   # Don't replace the instance when user_data changes — world data must persist
