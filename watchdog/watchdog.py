@@ -192,7 +192,8 @@ def main() -> None:
         count = get_player_count()
 
         if count is None:
-            # Server unreachable — treat as empty but don't reset counter
+            # Server unreachable — count this tick as empty so a stuck server
+            # doesn't keep the instance alive forever.
             _log("server_unreachable", empty_ticks=empty_ticks)
             empty_ticks += 1
         elif count > 0:

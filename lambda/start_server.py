@@ -20,9 +20,9 @@ def _log(event: str, **kwargs) -> None:
 
 
 def handler(event, context):
-    # Use os.environ['KEY'] — raises KeyError immediately if missing.
-    # Never use os.environ.get('KEY', default): it hides misconfiguration.
     instance_id = os.environ["INSTANCE_ID"]
+    # AWS_REGION_TARGET, not AWS_REGION: the latter is a reserved Lambda
+    # runtime variable and cannot be overridden.
     region = os.environ["AWS_REGION_TARGET"]
 
     ec2 = boto3.client("ec2", region_name=region)
